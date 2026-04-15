@@ -1,0 +1,822 @@
+/* =====================================================
+   STYLE.CSS — TaskFlow v2 (Revisado e Expandido)
+   =====================================================
+   Índice:
+    1.  Variáveis globais
+    2.  Reset e base
+    3.  Layout principal
+    4.  Cabeçalho e progresso
+    5.  Formulário
+    6.  Filtros
+    7.  Contadores
+    8.  Lista de tarefas
+    9.  Item de tarefa (base)
+    10. Variações de prioridade
+    11. Tarefa concluída e vencida
+    12. Estado vazio
+    13. Painel de histórico global
+    14. Modal de detalhes
+    15. Animações e keyframes
+===================================================== */
+
+
+/* ── 1. VARIÁVEIS GLOBAIS ────────────────────────── */
+:root {
+  /* Cores base */
+  --cor-fundo:         #0c0c10;
+  --cor-card:          #14141c;
+  --cor-card-hover:    #1c1c28;
+  --cor-borda:         #252535;
+  --cor-borda-suave:   #1e1e2e;
+  --cor-texto:         #ddddf0;
+  --cor-texto-fraco:   #6a6a8a;
+  --cor-destaque:      #a78bfa;   /* Violeta — cor de destaque principal */
+  --cor-destaque-dim:  rgba(167, 139, 250, 0.12);
+
+  /* Prioridades */
+  --cor-alta:          #f87171;
+  --cor-alta-fundo:    rgba(248, 113, 113, 0.07);
+  --cor-alta-borda:    rgba(248, 113, 113, 0.35);
+
+  --cor-media:         #fbbf24;
+  --cor-media-fundo:   rgba(251, 191, 36, 0.07);
+  --cor-media-borda:   rgba(251, 191, 36, 0.35);
+
+  --cor-baixa:         #34d399;
+  --cor-baixa-fundo:   rgba(52, 211, 153, 0.07);
+  --cor-baixa-borda:   rgba(52, 211, 153, 0.35);
+
+  /* Alerta de prazo vencido */
+  --cor-vencida:       #fb923c;
+  --cor-vencida-fundo: rgba(251, 146, 60, 0.08);
+
+  /* Tipografia */
+  --fonte-titulo: 'Playfair Display', serif;
+  --fonte-corpo:  'Syne', sans-serif;
+
+  /* Dimensões */
+  --raio:         14px;
+  --raio-pequeno: 8px;
+  --raio-pill:    999px;
+  --sombra:       0 8px 32px rgba(0, 0, 0, 0.5);
+  --sombra-card:  0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+/* ── 2. RESET E BASE ────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--fonte-corpo);
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+
+  /* Gradientes de profundidade no fundo */
+  background-image:
+    radial-gradient(ellipse 60% 40% at 10% 0%,   rgba(167, 139, 250, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 90% 100%,  rgba(52, 211, 153, 0.05)  0%, transparent 70%);
+}
+
+
+/* ── 3. LAYOUT PRINCIPAL ──────────────────────── */
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative; /* necessário para o painel de histórico se posicionar */
+}
+
+
+/* ── 4. CABEÇALHO E PROGRESSO ───────────────── */
+.header {
+  padding: 0.5rem 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 2.2rem;
+  color: var(--cor-destaque);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.subtitulo {
+  color: var(--cor-texto-fraco);
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Botão "Histórico" no cabeçalho */
+.btn-historico {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pill);
+  color: var(--cor-texto-fraco);
+  font-family: var(--fonte-corpo);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.btn-historico:hover {
+  border-color: var(--cor-destaque);
+  color: var(--cor-destaque);
+}
+
+.btn-historico.ativo {
+  background: var(--cor-destaque-dim);
+  border-color: var(--cor-destaque);
+  color: var(--cor-destaque);
+}
+
+/* Wrapper da barra de progresso */
+.progresso-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.progresso-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--cor-texto-fraco);
+}
+
+#percentualProgresso {
+  color: var(--cor-destaque);
+  font-weight: 600;
+}
+
+.progresso-barra-fundo {
+  height: 4px;
+  background: var(--cor-borda);
+  border-radius: var(--raio-pill);
+  overflow: hidden;
+}
+
+.progresso-barra {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cor-destaque), var(--cor-baixa));
+  border-radius: var(--raio-pill);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ── 5. FORMULÁRIO ──────────────────────────── */
+.form-card {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 1.1rem;
+  box-shadow: var(--sombra-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-linha-principal {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.form-linha-secundaria {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap; /* em telas pequenas, quebra a linha */
+}
+
+/* Estilo base compartilhado: input de texto e selects */
+.input-tarefa,
+.seletor {
+  background: var(--cor-fundo);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  color: var(--cor-texto);
+  font-family: var(--fonte-corpo);
+  font-size: 0.88rem;
+  padding: 0.65rem 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-tarefa {
+  flex: 1;
+  width: 100%;
+}
+
+.input-tarefa:focus,
+.seletor:focus {
+  border-color: var(--cor-destaque);
+}
+
+.input-tarefa::placeholder {
+  color: var(--cor-texto-fraco);
+}
+
+/* Estilo específico do seletor de prioridade */
+.seletor-prioridade {
+  flex: 1;
+  min-width: 120px;
+  cursor: pointer;
+}
+
+/* Campo de data/hora para o prazo */
+.input-prazo {
+  flex: 1.5;
+  min-width: 180px;
+  cursor: pointer;
+  /* Remove o ícone de calendário padrão em webkit (Chrome/Safari) para customizar */
+  color-scheme: dark;
+}
+
+/* Botão de adicionar */
+.btn-adicionar {
+  background: var(--cor-destaque);
+  color: #0c0c10;
+  border: none;
+  border-radius: var(--raio-pequeno);
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.65rem 1.2rem;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.btn-adicionar:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.35);
+}
+
+.btn-adicionar:active {
+  transform: scale(0.97);
+}
+
+/* Animação de erro no campo vazio — MELHORIA APLICADA */
+.input-tarefa.erro {
+  border-color: var(--cor-alta);
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-7px); }
+  60%       { transform: translateX(7px); }
+  80%       { transform: translateX(-4px); }
+}
+
+
+/* ── 6. FILTROS ─────────────────────────────── */
+.filtros {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.btn-filtro {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pill);
+  color: var(--cor-texto-fraco);
+  font-family: var(--fonte-corpo);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.3px;
+}
+
+.btn-filtro:hover {
+  border-color: var(--cor-destaque);
+  color: var(--cor-texto);
+}
+
+/* Filtro ativo: destaque visual */
+.btn-filtro.ativo {
+  background: var(--cor-destaque-dim);
+  border-color: var(--cor-destaque);
+  color: var(--cor-destaque);
+}
+
+
+/* ── 7. CONTADORES ──────────────────────────── */
+.contadores {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--cor-texto-fraco);
+}
+
+.separador { opacity: 0.3; }
+
+.contador-vencidas {
+  color: var(--cor-vencida);
+}
+
+/* Esconde o contador de vencidas quando é zero */
+.contador-vencidas.zero { display: none; }
+
+
+/* ── 8. LISTA DE TAREFAS ──────────────────── */
+.lista-tarefas {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+
+/* ── 9. ITEM DE TAREFA (BASE) ─────────────── */
+.item-tarefa {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda-suave);
+  border-left: 4px solid transparent;
+  border-radius: var(--raio);
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  transition: background 0.2s, box-shadow 0.2s;
+  animation: entrar 0.22s ease-out;
+  position: relative;
+}
+
+.item-tarefa:hover {
+  background: var(--cor-card-hover);
+  box-shadow: var(--sombra-card);
+}
+
+/* Checkbox */
+.item-tarefa input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  margin-top: 2px; /* alinha visualmente com a primeira linha do texto */
+  cursor: pointer;
+  accent-color: var(--cor-destaque);
+}
+
+/* Bloco central: texto + metadados */
+.tarefa-corpo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0; /* necessário para o texto truncar corretamente */
+}
+
+/* Texto da tarefa */
+.texto-tarefa {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  word-break: break-word;
+  cursor: text;
+}
+
+/* Dica de edição ao passar o mouse */
+.texto-tarefa:hover::after {
+  content: " ✏️";
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+/* Input de edição inline — aparece ao dar duplo clique no texto */
+.input-edicao {
+  font-family: var(--fonte-corpo);
+  font-size: 0.9rem;
+  background: var(--cor-fundo);
+  border: 1px solid var(--cor-destaque);
+  border-radius: 6px;
+  color: var(--cor-texto);
+  padding: 0.3rem 0.5rem;
+  outline: none;
+  width: 100%;
+}
+
+/* Metadados: data de criação, prazo, etc. */
+.tarefa-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  font-size: 0.7rem;
+  color: var(--cor-texto-fraco);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Prazo vencido: texto fica laranja */
+.meta-item.vencida {
+  color: var(--cor-vencida);
+  font-weight: 600;
+}
+
+/* Ações do lado direito: badge + botões */
+.tarefa-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Badge de prioridade */
+.badge-prioridade {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  padding: 0.18rem 0.55rem;
+  border-radius: var(--raio-pill);
+  text-transform: uppercase;
+}
+
+/* Grupo de botões de ação */
+.grupo-botoes {
+  display: flex;
+  gap: 0.3rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+/* Mostra os botões ao passar o mouse no item */
+.item-tarefa:hover .grupo-botoes {
+  opacity: 1;
+}
+
+/* Botão genérico de ação (info e remover) */
+.btn-acao {
+  background: transparent;
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  color: var(--cor-texto-fraco);
+  font-size: 0.75rem;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.btn-acao:hover { background: var(--cor-borda); color: var(--cor-texto); }
+
+/* Botão remover: fica vermelho no hover */
+.btn-acao.remover:hover {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: var(--cor-alta);
+  color: var(--cor-alta);
+}
+
+/* Estado de confirmação de exclusão */
+.btn-acao.remover.confirmar {
+  background: rgba(248, 113, 113, 0.2);
+  border-color: var(--cor-alta);
+  color: var(--cor-alta);
+  font-weight: 700;
+  width: auto;
+  padding: 0 0.5rem;
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+
+
+/* ── 10. VARIAÇÕES DE PRIORIDADE ─────────── */
+
+.prioridade-alta {
+  border-left-color: var(--cor-alta);
+  background: var(--cor-alta-fundo);
+}
+.prioridade-alta .badge-prioridade {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--cor-alta);
+  border: 1px solid var(--cor-alta-borda);
+}
+
+.prioridade-media {
+  border-left-color: var(--cor-media);
+  background: var(--cor-media-fundo);
+}
+.prioridade-media .badge-prioridade {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--cor-media);
+  border: 1px solid var(--cor-media-borda);
+}
+
+.prioridade-baixa {
+  border-left-color: var(--cor-baixa);
+  background: var(--cor-baixa-fundo);
+}
+.prioridade-baixa .badge-prioridade {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--cor-baixa);
+  border: 1px solid var(--cor-baixa-borda);
+}
+
+
+/* ── 11. TAREFA CONCLUÍDA / VENCIDA ──────── */
+
+.item-tarefa.concluida {
+  opacity: 0.4;
+}
+
+.item-tarefa.concluida .texto-tarefa {
+  text-decoration: line-through;
+  color: var(--cor-texto-fraco);
+}
+
+/* Tarefa com prazo vencido (não concluída) */
+.item-tarefa.vencida:not(.concluida) {
+  background: var(--cor-vencida-fundo);
+  border-left-color: var(--cor-vencida);
+}
+
+
+/* ── 12. ESTADO VAZIO ────────────────────── */
+.estado-vazio {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--cor-texto-fraco);
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+
+.icone-vazio {
+  font-size: 2.2rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.4;
+}
+
+/* Utilitário: esconde qualquer elemento */
+.escondido { display: none !important; }
+
+
+/* ── 13. PAINEL DE HISTÓRICO GLOBAL ────── */
+.painel-historico {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--sombra);
+  animation: entrar 0.2s ease-out;
+}
+
+.painel-historico-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.painel-historico-cabecalho h2 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--cor-texto);
+  letter-spacing: 0.3px;
+}
+
+.lista-historico {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 240px;
+  overflow-y: auto;    /* Scroll se tiver muitos itens */
+  padding-right: 4px;
+}
+
+/* Estiliza a scrollbar do histórico */
+.lista-historico::-webkit-scrollbar { width: 4px; }
+.lista-historico::-webkit-scrollbar-track { background: transparent; }
+.lista-historico::-webkit-scrollbar-thumb { background: var(--cor-borda); border-radius: 4px; }
+
+.item-historico {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  font-size: 0.75rem;
+  color: var(--cor-texto-fraco);
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--cor-borda-suave);
+}
+
+.item-historico:last-child { border-bottom: none; }
+
+.historico-hora {
+  color: var(--cor-destaque);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.historico-vazio {
+  font-size: 0.78rem;
+  color: var(--cor-texto-fraco);
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.btn-fechar {
+  background: transparent;
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  color: var(--cor-texto-fraco);
+  font-size: 0.75rem;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-fechar:hover {
+  background: var(--cor-borda);
+  color: var(--cor-texto);
+}
+
+
+/* ── 14. MODAL DE DETALHES DA TAREFA ──── */
+.modal-overlay {
+  position: fixed;           /* Fica fixo sobre toda a página */
+  inset: 0;                  /* top:0 right:0 bottom:0 left:0 em uma linha */
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal-box {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--sombra);
+  animation: entrar 0.2s ease-out;
+}
+
+.modal-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.modal-cabecalho h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--cor-destaque);
+}
+
+.modal-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Linha individual dentro do modal */
+.modal-linha {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--cor-fundo);
+  border-radius: var(--raio-pequeno);
+}
+
+.modal-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--cor-texto-fraco);
+}
+
+.modal-valor {
+  font-size: 0.82rem;
+  color: var(--cor-texto);
+  line-height: 1.4;
+}
+
+/* Seção do histórico de alterações dentro do modal */
+.modal-historico-titulo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--cor-texto-fraco);
+  margin-top: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--cor-borda-suave);
+}
+
+.modal-historico-lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.modal-historico-lista::-webkit-scrollbar { width: 4px; }
+.modal-historico-lista::-webkit-scrollbar-thumb { background: var(--cor-borda); border-radius: 4px; }
+
+.modal-historico-item {
+  display: flex;
+  gap: 0.6rem;
+  font-size: 0.73rem;
+  color: var(--cor-texto-fraco);
+  align-items: flex-start;
+}
+
+.modal-historico-hora {
+  color: var(--cor-destaque);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+
+/* ── 15. ANIMAÇÕES ──────────────────────── */
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+/* ── RESPONSIVIDADE ────────────────────── */
+/* Em telas muito pequenas, ajusta o formulário */
+@media (max-width: 480px) {
+  .titulo { font-size: 1.8rem; }
+
+  .form-linha-secundaria {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-adicionar { width: 100%; justify-content: center; }
+  .seletor-prioridade, .input-prazo { min-width: unset; }
+
+  .filtros { gap: 0.3rem; }
+  .btn-filtro { font-size: 0.7rem; padding: 0.3rem 0.65rem; }
+}

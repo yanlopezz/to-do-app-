@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Lista de Tarefas</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Fonte: Playfair Display (títulos elegantes) + Syne (corpo moderno) -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Syne:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- ══════════════════════════════════════
+         CABEÇALHO
+    ══════════════════════════════════════ -->
+    <header class="header">
+      <div class="header-top">
+        <div>
+          <h1 class="titulo">TaskFlow</h1>
+          <p class="subtitulo">Organize com intenção.</p>
+        </div>
+        <!-- Botão para abrir/fechar o painel de histórico global -->
+        <button id="btnHistorico" class="btn-historico" aria-label="Ver histórico de ações">
+          <span class="icone-historico">⏱</span>
+          Histórico
+        </button>
+      </div>
+
+      <!-- Barra de progresso geral -->
+      <div class="progresso-wrapper" aria-label="Progresso das tarefas">
+        <div class="progresso-info">
+          <span id="textoProgresso">0 de 0 concluídas</span>
+          <span id="percentualProgresso">0%</span>
+        </div>
+        <div class="progresso-barra-fundo">
+          <!-- A largura desta barra é controlada pelo JS -->
+          <div id="progressoBarra" class="progresso-barra" style="width: 0%"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ══════════════════════════════════════
+         FORMULÁRIO DE NOVA TAREFA
+    ══════════════════════════════════════ -->
+    <div class="form-card">
+      <div class="form-linha-principal">
+        <!-- Campo de texto da tarefa -->
+        <input
+          type="text"
+          id="inputTarefa"
+          class="input-tarefa"
+          placeholder="Qual é a próxima tarefa?"
+          maxlength="120"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="form-linha-secundaria">
+        <!-- Seletor de prioridade -->
+        <select id="seletorPrioridade" class="seletor">
+          <option value="alta">🔴 Alta</option>
+          <option value="media" selected>🟡 Média</option>
+          <option value="baixa">🟢 Baixa</option>
+        </select>
+
+        <!-- Campo de prazo (deadline) -->
+        <!-- type="datetime-local" cria um seletor de data e hora nativo do navegador -->
+        <input
+          type="datetime-local"
+          id="inputPrazo"
+          class="seletor input-prazo"
+          title="Prazo para conclusão (opcional)"
+        />
+
+        <button id="btnAdicionar" class="btn-adicionar">
+          + Adicionar
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         FILTROS
+    ══════════════════════════════════════ -->
+    <div class="filtros" role="group" aria-label="Filtrar tarefas">
+      <!-- data-filtro: valor usado pelo JS para saber qual filtro foi clicado -->
+      <button class="btn-filtro ativo" data-filtro="todas">Todas</button>
+      <button class="btn-filtro" data-filtro="ativas">Ativas</button>
+      <button class="btn-filtro" data-filtro="concluidas">Concluídas</button>
+      <button class="btn-filtro" data-filtro="alta">🔴 Alta</button>
+      <button class="btn-filtro" data-filtro="media">🟡 Média</button>
+      <button class="btn-filtro" data-filtro="baixa">🟢 Baixa</button>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         CONTADORES
+    ══════════════════════════════════════ -->
+    <div class="contadores">
+      <span id="totalTarefas">0 tarefas</span>
+      <span class="separador">·</span>
+      <span id="tarefasConcluidas">0 concluídas</span>
+      <span class="separador">·</span>
+      <span id="tarefasVencidas" class="contador-vencidas">0 vencidas</span>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         LISTA DE TAREFAS
+         Preenchida dinamicamente pelo JS
+    ══════════════════════════════════════ -->
+    <ul id="listaTarefas" class="lista-tarefas" aria-live="polite"></ul>
+
+    <!-- ══════════════════════════════════════
+         ESTADO VAZIO
+    ══════════════════════════════════════ -->
+    <div id="estadoVazio" class="estado-vazio">
+      <div class="icone-vazio">📋</div>
+      <p>Nenhuma tarefa aqui.<br/>Adicione a primeira acima!</p>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PAINEL DE HISTÓRICO GLOBAL
+         Começa escondido; o botão "Histórico" o abre
+    ══════════════════════════════════════ -->
+    <aside id="painelHistorico" class="painel-historico escondido" aria-label="Histórico de ações">
+      <div class="painel-historico-cabecalho">
+        <h2>Histórico de Ações</h2>
+        <button id="btnFecharHistorico" class="btn-fechar" aria-label="Fechar histórico">✕</button>
+      </div>
+      <!-- Preenchido pelo JS -->
+      <ul id="listaHistorico" class="lista-historico"></ul>
+      <p id="historicoVazio" class="historico-vazio">Nenhuma ação registrada ainda.</p>
+    </aside>
+
+  </div><!-- fim .container -->
+
+  <!-- Modal de detalhes / histórico da tarefa individual -->
+  <!-- Aparece ao clicar no ícone de info de uma tarefa -->
+  <div id="modalDetalhe" class="modal-overlay escondido" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-cabecalho">
+        <h3 id="modalTitulo">Detalhes da Tarefa</h3>
+        <button id="btnFecharModal" class="btn-fechar" aria-label="Fechar">✕</button>
+      </div>
+      <div id="modalConteudo" class="modal-conteudo"></div>
+    </div>
+  </div>
+
+  <!-- Script sempre no final do body -->
+  <script src="script.js"></script>
+</body>
+</html>
